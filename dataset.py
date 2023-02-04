@@ -17,15 +17,25 @@ val_sharp_bicubic = os.path.join(val_dir, "val_sharp_bicubic/X4")
 val_blur_bicubic = os.path.join(val_dir, "val_blur_bicubic/X4")
 
 
-def training_validation_split(dir, train_list: list, val_list: list):
+# def training_validation_split(dir, train_list: list, val_list: list):
+#     for folder in sorted(os.listdir(dir)):
+#         f_path = os.path.join(dir, folder)
+#         if os.path.isdir(f_path):
+#             images = []
+#             for image_name in sorted(os.listdir(f_path)):
+#                 image_path = os.path.join(f_path, image_name)
+#                 image = plt.imread(image_path)
+#                 images.append(image)
+#             train_list.append(images[:210])
+#             val_list.append(images[210:])
+
+def training_validation_split(dir, train_list, val_list):
     for folder in sorted(os.listdir(dir)):
         f_path = os.path.join(dir, folder)
         if os.path.isdir(f_path):
-            images = []
-            for image_name in sorted(os.listdir(f_path)):
-                image_path = os.path.join(f_path, image_name)
-                image = plt.imread(image_path)
-                images.append(image)
+            image_names = sorted(os.listdir(f_path))
+            image_paths = [os.path.join(f_path, name) for name in image_names]
+            images = [np.memmap(image_path, dtype=np.uint8, mode='r') for image_path in image_paths]
             train_list.append(images[:210])
             val_list.append(images[210:])
 

@@ -16,7 +16,7 @@ class PixelShuffle(tf.keras.layers.Layer):
                          c * (self.upscale_factor ** 2)))
         return x
 
-def ELSR(upscale_factor=4):
+def ELSR(upscale_factor=4) -> tf.keras.models.Model:
     input = Input(shape=(320, 180, 3))
     x = Conv2D(6, kernel_size=(3, 3), padding="same", kernel_initializer="he_normal", activation="relu")(input)
     x = Conv2D(6, kernel_size=(3, 3), padding="same", kernel_initializer="he_normal")(x)

@@ -17,25 +17,15 @@ val_sharp_bicubic = os.path.join(val_dir, "val_sharp_bicubic/X4")
 val_blur_bicubic = os.path.join(val_dir, "val_blur_bicubic/X4")
 
 
-# def training_validation_split(dir, train_list: list, val_list: list):
-#     for folder in sorted(os.listdir(dir)):
-#         f_path = os.path.join(dir, folder)
-#         if os.path.isdir(f_path):
-#             images = []
-#             for image_name in sorted(os.listdir(f_path)):
-#                 image_path = os.path.join(f_path, image_name)
-#                 image = plt.imread(image_path)
-#                 images.append(image)
-#             train_list.append(images[:210])
-#             val_list.append(images[210:])
-
-def training_validation_split(dir, train_list, val_list):
+def training_validation_split(dir, train_list: list, val_list: list):
     for folder in sorted(os.listdir(dir)):
         f_path = os.path.join(dir, folder)
         if os.path.isdir(f_path):
-            image_names = sorted(os.listdir(f_path))
-            image_paths = [os.path.join(f_path, name) for name in image_names]
-            images = [np.memmap(image_path, dtype=np.uint8, mode='r') for image_path in image_paths]
+            images = []
+            for image_name in sorted(os.listdir(f_path)):
+                image_path = os.path.join(f_path, image_name)
+                image = plt.imread(image_path)
+                images.append(image)
             train_list.append(images[:210])
             val_list.append(images[210:])
 
@@ -63,19 +53,15 @@ def get_training_data():
 
     # Load training/validation data
     training_validation_split(train_sharp_bicubic, train_X, val_X)
-    print("DONE 1")
     training_validation_split(train_blur_bicubic, train_X, val_X)
-    print("DONE 2")
     training_validation_split(train_sharp, train_Y, val_Y)
-    print("DONE 3")
     training_validation_split(train_blur, train_Y, val_Y)
-    print("DONE 4")
 
-    train_X = np.array(train_X)
-    train_Y = np.array(train_Y)
+    train_X = np.array(train_X, dtype=object)
+    train_Y = np.array(train_Y, dtype=object)
 
-    val_X = np.array(val_X)
-    val_Y = np.array(val_Y)
+    val_X = np.array(val_X, dtype=object)
+    val_Y = np.array(val_Y, dtype=object)
 
     return train_X, train_Y, val_X, val_Y
 

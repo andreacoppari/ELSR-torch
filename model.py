@@ -1,5 +1,6 @@
 import tensorflow as tf
 from tensorflow.keras.layers import Conv2D, Input, PReLU
+from tensorflow.keras.models import Model
 
 class PixelShuffle(tf.keras.layers.Layer):
     def __init__(self, upscale_factor, **kwargs):
@@ -16,7 +17,7 @@ class PixelShuffle(tf.keras.layers.Layer):
                          c * (self.upscale_factor ** 2)))
         return x
 
-def ELSR(upscale_factor=4) -> tf.keras.models.Model:
+def ELSR(upscale_factor=4) -> Model:
     input = Input(shape=(320, 180, 3))
     x = Conv2D(6, kernel_size=(3, 3), padding="same", kernel_initializer="he_normal", activation="relu")(input)
     x = Conv2D(6, kernel_size=(3, 3), padding="same", kernel_initializer="he_normal")(x)

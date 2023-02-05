@@ -2,7 +2,7 @@ import cv2
 import random
 
 def resize_img(image):
-    return cv2.resize(image, (320, 180))
+    return cv2.resize(image, (180, 320))
 
 def augment_data(low_res, high_res):
     # Randomly choose a type of augmentation
@@ -14,15 +14,19 @@ def augment_data(low_res, high_res):
         high_res = cv2.flip(high_res, 1)
     elif aug_type == "rotate":
         angle = random.uniform(-30, 30)
-        rows, cols = low_res.shape[:2]
-        M = cv2.getRotationMatrix2D((cols/2, rows/2), angle, 1)
-        low_res = cv2.warpAffine(low_res, M, (cols, rows))
-        high_res = cv2.warpAffine(high_res, M, (cols, rows))
+        rowsLR, colsLR = low_res.shape[:2]
+        MLR = cv2.getRotationMatrix2D((colsLR/2, rowsLR/2), angle, 1)
+        low_res = cv2.warpAffine(low_res, MLR, (colsLR, rowsLR))
+        rowsHR, colsHR = high_res.shape[:2]
+        MHR = cv2.getRotationMatrix2D((colsHR/2, rowsHR/2), angle, 1)
+        high_res = cv2.warpAffine(high_res, MHR, (colsHR, rowsHR))
     elif aug_type == "zoom":
         zoom_scale = random.uniform(0.8, 1.2)
-        rows, cols = low_res.shape[:2]
-        M = cv2.getRotationMatrix2D((cols/2, rows/2), 0, zoom_scale)
-        low_res = cv2.warpAffine(low_res, M, (cols, rows))
-        high_res = cv2.warpAffine(high_res, M, (cols, rows))
+        rowsLR, colsLR = low_res.shape[:2]
+        MLR = cv2.getRotationMatrix2D((colsLR/2, rowsLR/2), 0, zoom_scale)
+        low_res = cv2.warpAffine(low_res, MLR, (colsLR, rowsLR))
+        rowsHR, colsHR = high_res.shape[:2]
+        MHR = cv2.getRotationMatrix2D((colsHR/2, rowsHR/2), 0, zoom_scale)
+        high_res = cv2.warpAffine(high_res, MHR, (colsHR, rowsHR))
     
     return low_res, high_res

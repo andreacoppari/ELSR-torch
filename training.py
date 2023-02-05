@@ -4,10 +4,11 @@ from model import ELSR
 import numpy as np
 import os
 
-train_X = np.array(np.load(os.path.join(os.getcwd(), "datasets/npy/train_aug_X.npy")), dtype="float32")
-train_Y = np.array(np.load(os.path.join(os.getcwd(), "datasets/npy/train_aug_Y.npy")), dtype="float32")
-val_X = np.array(np.load(os.path.join(os.getcwd(), "datasets/npy/val_X.npy")), dtype="float32")
-val_Y = np.array(np.load(os.path.join(os.getcwd(), "datasets/npy/val_Y.npy")), dtype="float32")
+train_X = np.load(os.path.join(os.getcwd(), "datasets/npy/train_aug_X.npy"))
+print("\n\n\n\n\n", type(train_X), train_X.shape, "\n\n\n\n\n")
+train_Y = np.load(os.path.join(os.getcwd(), "datasets/npy/train_aug_Y.npy"))
+val_X = np.load(os.path.join(os.getcwd(), "datasets/npy/val_X.npy"))
+val_Y = np.load(os.path.join(os.getcwd(), "datasets/npy/val_Y.npy"))
 
 model = ELSR(upscale_factor=4)
 model.compile(optimizer=Adam(learning_rate=5e-4), loss='mse')

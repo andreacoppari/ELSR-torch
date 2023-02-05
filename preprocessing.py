@@ -7,7 +7,7 @@ def resize_img(image):
 def augment_data(low_res, high_res):
     # Randomly choose a type of augmentation
     aug_type = random.choice(["flip", "rotate", "zoom", "none"])
-    
+
     # Perform the chosen type of augmentation
     if aug_type == "flip":
         low_res = cv2.flip(low_res, 1)

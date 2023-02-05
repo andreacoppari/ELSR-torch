@@ -1,24 +1,16 @@
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import LearningRateScheduler
 from model import ELSR
-from dataset import get_training_data
-from preprocessing import augment_data
+import numpy as np
+import os
 
-train_X, train_Y, val_X, val_Y = get_training_data()
-
-train_aug_X = []
-train_aug_Y = []
-
-for lr, hr in train_X, train_Y:
-    l,h = augment_data(lr, hr)
-    train_aug_X.append(l)
-    train_aug_Y.append(h)
-
-print(f"train_X samples: {len(train_X)}, {len(val_X)}")
-print(f"train_X sample shape: {train_X[0].shape}")
+train_X = np.array(np.load(os.path.join(os.getcwd(), "datasets/npy/train_aug_X.npy")), dtype="float32")
+train_Y = np.array(np.load(os.path.join(os.getcwd(), "datasets/npy/train_aug_Y.npy")), dtype="float32")
+val_X = np.array(np.load(os.path.join(os.getcwd(), "datasets/npy/val_X.npy")), dtype="float32")
+val_Y = np.array(np.load(os.path.join(os.getcwd(), "datasets/npy/val_Y.npy")), dtype="float32")
 
 model = ELSR(upscale_factor=4)
-model.compile(optimizer=Adam(learning_rate=5e-4), loss='mae')
+model.compile(optimizer=Adam(learning_rate=5e-4), loss='mse')
 
 model.fit(train_X, train_Y, batch_size=32, epochs=500, validation_data=(val_X, val_Y), 
             callbacks=[LearningRateScheduler(lambda epoch: 5e-4*0.5**(epoch//200))])

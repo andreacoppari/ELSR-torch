@@ -1,6 +1,8 @@
 import os
+import cv2
 import numpy as np
 import matplotlib.pyplot as plt
+import h5py
 
 root_dir = "./datasets/"
 train_dir = os.path.join(root_dir, "train/")
@@ -41,35 +43,60 @@ def val_data(dir, val_list: list):
             val_list.append(images)
 
 
-def generate_training_data():
-    # train set
-    train_X = []
-    train_Y = []
+def generate_training_data(data_path):
+    c = 0
+    if len(os.listdir('datasets/resized/')) > 0: c += 1000
+    for folder, j in zip(sorted(os.listdir(data_path)), range(10)):
+        for image in sorted(os.listdir(os.path.join(data_path, folder))):
+            image_path = os.path.join(data_path, folder, image)
+            resized_image = resize_image(image_path)
+            plt.imsave(f'datasets/resized/{c}.png', resized_image)
+            c = c+1
 
-    # val set
-    val_X = []
-    val_Y = []
+def generate_label_data(data_path):
+    c = 0
+    if len(os.listdir('datasets/sr_resized/')) > 0: c += 1000
+    for folder, j in zip(sorted(os.listdir(data_path)), range(10)):
+        for image in sorted(os.listdir(os.path.join(data_path, folder))):
+            image_path = os.path.join(data_path, folder, image)
+            resized_image = resize_image(image_path)
+            plt.imsave(f'datasets/sr_resized/{c}.png', resized_image)
+            c = c+1         
 
-    # Load training/validation data
-    training_data(train_sharp_bicubic, train_X)
-    print("DONE trainX 1")
-    training_data(train_blur_bicubic, train_X)
-    print("DONE trainX 2")
-    training_data(train_sharp, train_Y)
-    print("DONE trainY 1")
-    training_data(train_blur, train_Y)
-    print("DONE trainY 2")
+    # # train set
+    # train_X = []
+    # train_Y = []
 
-    val_data(train_sharp_bicubic, val_X)
-    print("DONE valX 1")
-    val_data(train_blur_bicubic, val_X)
-    print("DONE valX 2")
-    val_data(train_sharp, val_Y)
-    print("DONE valY 1")
-    val_data(train_blur, val_Y)
-    print("DONE valY 2")
+    # # val set
+    # val_X = []
+    # val_Y = []
 
-    return train_X, train_Y, val_X, val_Y
+    # # Load training/validation data
+    # training_data(train_sharp_bicubic, train_X)
+    # print("DONE trainX 1")
+    # training_data(train_blur_bicubic, train_X)
+    # print("DONE trainX 2")
+    # training_data(train_sharp, train_Y)
+    # print("DONE trainY 1")
+    # training_data(train_blur, train_Y)
+    # print("DONE trainY 2")
+
+    # val_data(train_sharp_bicubic, val_X)
+    # print("DONE valX 1")
+    # val_data(train_blur_bicubic, val_X)
+    # print("DONE valX 2")
+    # val_data(train_sharp, val_Y)
+    # print("DONE valY 1")
+    # val_data(train_blur, val_Y)
+    # print("DONE valY 2")
+
+    # return train_X, train_Y, val_X, val_Y
+
+def resize_image(img_path):
+    image = cv2.imread(img_path)
+    resized_image = cv2.resize(image, dsize=(image.shape[1]//4, image.shape[0]//4))
+    resized_image = cv2.cvtColor(resized_image, cv2.COLOR_BGR2RGB)
+    return resized_image
 
 # # Save the data splits as .npy files
 # np.save('train_X.npy', train_X)

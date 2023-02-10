@@ -1,9 +1,8 @@
 **Table of Contents**
-
 [TOC]
 
 # ELSR-torch
-Implementation of the paper "ELSR: Extreme Low-Power Super Resolution Network For Mobile Devices" using PyTorch. The code replicates the method proposed by the paper, but it is meant to be trained on limited device. For that purpose the dataset is drastically smaller, and the training is way simpler.
+Implementation of the paper ["ELSR: Extreme Low-Power Super Resolution Network For Mobile Devices"](https://arxiv.org/abs/2208.14600) using PyTorch. The code replicates the method proposed by the paper, but it is meant to be trained on limited device. For that purpose the dataset is drastically smaller, and the training is way simpler.
 
 ## Prerequisites
 In order to run the code on your machine you will need python>=3.9 and the packages listed on the file requirements.txt. I suggest using Anaconda, run:

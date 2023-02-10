@@ -1,5 +1,8 @@
-**Table of Contents**
-[TOC]
+- [ELSR-torch](#elsr-torch)
+  * [Prerequisites](#prerequisites)
+  * [Dataset](#dataset)
+  * [Usage](#usage)
+  * [Results](#results)
 
 # ELSR-torch
 Implementation of the paper ["ELSR: Extreme Low-Power Super Resolution Network For Mobile Devices"](https://arxiv.org/abs/2208.14600) using PyTorch. The code replicates the method proposed by the paper, but it is meant to be trained on limited device. For that purpose the dataset is drastically smaller, and the training is way simpler.
@@ -31,3 +34,4 @@ python training.py
 ```
 
 ## Results
+Not yet :)

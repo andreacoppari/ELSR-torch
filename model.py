@@ -3,7 +3,7 @@ from torch import nn
 
 
 class ELSR(nn.Module):
-    def __init__(self, scale_factor):
+    def __init__(self, upscale_factor):
         super(ELSR, self).__init__()
         self.first_part = nn.Sequential(
             nn.Conv2d(3, 6, kernel_size=3, padding=3//2),
@@ -14,8 +14,8 @@ class ELSR(nn.Module):
             nn.ReLU(),
         )
         self.last_part = nn.Sequential(
-            nn.Conv2d(6, 6 * (scale_factor ** 2), kernel_size=3, padding=3 // 2),     # 6 -> 48
-            nn.PixelShuffle(scale_factor)
+            nn.Conv2d(6, 3 * (upscale_factor ** 2), kernel_size=3, padding=3 // 2),     # 6 -> 48
+            nn.PixelShuffle(upscale_factor)
         )
 
         self._initialize_weights()
@@ -34,3 +34,20 @@ class ELSR(nn.Module):
         x = self.first_part(x)
         x = self.last_part(x)
         return x
+
+
+class AverageMeter(object):
+    def __init__(self):
+        self.reset()
+
+    def reset(self):
+        self.val = 0
+        self.avg = 0
+        self.sum = 0
+        self.count = 0
+
+    def update(self, val, n=1):
+        self.val = val
+        self.sum += val * n
+        self.count += n
+        self.avg = self.sum / self.count

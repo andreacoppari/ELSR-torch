@@ -1,11 +1,13 @@
 import cv2
 import random
 import numpy as np
-
-def resize_img(image):
-    return cv2.resize(image, (180, 320))
+import torch
 
 def augment_data(low_res, high_res):
+    # Read images
+    low_res = cv2.cvtColor(cv2.imread(low_res), cv2.COLOR_BGR2RGB)
+    high_res = cv2.cvtColor(cv2.imread(high_res), cv2.COLOR_BGR2RGB)
+
     # Randomly choose a type of augmentation
     aug_type = random.choice(["flip", "rotate", "zoom", "none"])
 
@@ -32,6 +34,12 @@ def augment_data(low_res, high_res):
     
     return low_res, high_res
 
+def convert_rgb_to_y(img, dim_order='hwc'):
+    if dim_order == 'hwc':
+        return 16. + (64.738 * img[..., 0] + 129.057 * img[..., 1] + 25.064 * img[..., 2]) / 256.
+    else:
+        return 16. + (64.738 * img[0] + 129.057 * img[1] + 25.064 * img[2]) / 256.
+
 def convert_rgb_to_ycbcr(img, dim_order='hwc'):
     if dim_order == 'hwc':
         y = 16. + (64.738 * img[..., 0] + 129.057 * img[..., 1] + 25.064 * img[..., 2]) / 256.
@@ -53,3 +61,15 @@ def convert_ycbcr_to_rgb(img, dim_order='hwc'):
         g = 298.082 * img[0] / 256. - 100.291 * img[1] / 256. - 208.120 * img[2] / 256. + 135.576
         b = 298.082 * img[0] / 256. + 516.412 * img[1] / 256. - 276.836
     return np.array([r, g, b]).transpose([1, 2, 0])
+
+def psnr(img1, img2):
+    return 10. * torch.log10(1. / torch.mean((img1 - img2) ** 2))
+
+def prepare_img(img, device):
+    img = np.array(img, dtype='float32')
+    ycbcr = convert_rgb_to_ycbcr(img=img)
+    x = ycbcr[..., 0]
+    x /= 255.
+    x = torch.from_numpy(x).to(device)
+    x = x.unsqueeze(0).unsqueeze(0)
+    return x, ycbcr

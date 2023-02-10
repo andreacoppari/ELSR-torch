@@ -3,44 +3,79 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 import h5py
-
-root_dir = "./datasets/"
-train_dir = os.path.join(root_dir, "train/")
-val_dir = os.path.join(root_dir, "val/")
-
-train_sharp = os.path.join(train_dir, "train_sharp/")
-train_blur = os.path.join(train_dir, "train_blur/")
-train_sharp_bicubic = os.path.join(train_dir, "train_sharp_bicubic/X4")
-train_blur_bicubic = os.path.join(train_dir, "train_blur_bicubic/X4")
-
-val_sharp = os.path.join(val_dir, "val_sharp/")
-val_blur = os.path.join(val_dir, "val_blur/")
-val_sharp_bicubic = os.path.join(val_dir, "val_sharp_bicubic/X4")
-val_blur_bicubic = os.path.join(val_dir, "val_blur_bicubic/X4")
+from torch.utils.data import Dataset
+from preprocessing import convert_rgb_to_y
 
 
-def training_data(dir, train_list: list):
-    for folder in sorted(os.listdir(dir))[:4]:
-        f_path = os.path.join(dir, folder)
-        if os.path.isdir(f_path):
-            images = []
-            for image_name in sorted(os.listdir(f_path)):
-                image_path = os.path.join(f_path, image_name)
-                image = plt.imread(image_path)
-                images.append(image)
-            train_list.append(images)
+class TrainDataset(Dataset):
+    def __init__(self, h5_file):
+        super(TrainDataset, self).__init__()
+        self.h5_file = h5_file
+
+    def __getitem__(self, idx):
+        with h5py.File(self.h5_file, 'r') as f:
+            return np.expand_dims(f['lr'][idx] / 255., 0), np.expand_dims(f['hr'][idx] / 255., 0)
+
+    def __len__(self):
+        with h5py.File(self.h5_file, 'r') as f:
+            return len(f['lr'])
+
+class ValDataset(Dataset):
+    def __init__(self, h5_file):
+        super(ValDataset, self).__init__()
+        self.h5_file = h5_file
+
+    def __getitem__(self, idx):
+        with h5py.File(self.h5_file, 'r') as f:
+            return np.expand_dims(f['lr'][str(idx)][:, :] / 255., 0), np.expand_dims(f['hr'][str(idx)][:, :] / 255., 0)
+
+    def __len__(self):
+        with h5py.File(self.h5_file, 'r') as f:
+            return len(f['lr'])
 
 
-def val_data(dir, val_list: list):
-    for folder in sorted(os.listdir(dir))[4:5]:
-        folder_path = os.path.join(dir, folder)
-        if os.path.isdir(folder_path):
-            images = []
-            for image_name in sorted(os.listdir(folder_path)):
-                image_path = os.path.join(folder_path, image_name)
-                image = plt.imread(image_path)
-                images.append(image)
-            val_list.append(images)
+def training_data(out_path):
+    h5_file = h5py.File(out_path, "w")
+
+    lr_patches = []
+    hr_patches = []
+
+    for image_path in sorted(os.listdir("datasets/resized/aug")):
+        lr = cv2.cvtColor(cv2.imread(f"datasets/resized/aug/{image_path}"), cv2.COLOR_BGR2RGB)
+        hr = cv2.cvtColor(cv2.imread(f"datasets/sr_resized/aug/{image_path}"), cv2.COLOR_BGR2RGB)
+
+        lr = np.array(lr, dtype='float32')
+        hr = np.array(hr, dtype='float32')
+        lr = convert_rgb_to_y(lr)
+        hr = convert_rgb_to_y(hr)
+
+        lr_patches.append(lr)
+        hr_patches.append(hr)
+    
+    h5_file.create_dataset('lr', data=np.array(lr_patches))
+    h5_file.create_dataset('hr', data=np.array(hr_patches))
+
+    h5_file.close()
+
+def val_data(out_path):
+    h5_file = h5py.File(out_path, 'w')
+
+    lr_group = h5_file.create_group('lr')
+    hr_group = h5_file.create_group('hr')
+
+    for i, image_path in enumerate(sorted(os.listdir("datasets/val_resized/"))):
+        lr = cv2.cvtColor(cv2.imread(f"datasets/val_resized/{image_path}"), cv2.COLOR_BGR2RGB)
+        hr = cv2.cvtColor(cv2.imread(f"datasets/val_sr_resized/{image_path}"), cv2.COLOR_BGR2RGB)
+
+        lr = np.array(lr, dtype='float32')
+        hr = np.array(hr, dtype='float32')
+        lr = convert_rgb_to_y(lr)
+        hr = convert_rgb_to_y(hr)
+
+        lr_group.create_dataset(str(i), data=lr)
+        hr_group.create_dataset(str(i), data=hr)
+
+    h5_file.close()
 
 
 def generate_training_data(data_path):
@@ -61,36 +96,23 @@ def generate_label_data(data_path):
             image_path = os.path.join(data_path, folder, image)
             resized_image = resize_image(image_path)
             plt.imsave(f'datasets/sr_resized/{c}.png', resized_image)
-            c = c+1         
+            c = c+1
 
-    # # train set
-    # train_X = []
-    # train_Y = []
-
-    # # val set
-    # val_X = []
-    # val_Y = []
-
-    # # Load training/validation data
-    # training_data(train_sharp_bicubic, train_X)
-    # print("DONE trainX 1")
-    # training_data(train_blur_bicubic, train_X)
-    # print("DONE trainX 2")
-    # training_data(train_sharp, train_Y)
-    # print("DONE trainY 1")
-    # training_data(train_blur, train_Y)
-    # print("DONE trainY 2")
-
-    # val_data(train_sharp_bicubic, val_X)
-    # print("DONE valX 1")
-    # val_data(train_blur_bicubic, val_X)
-    # print("DONE valX 2")
-    # val_data(train_sharp, val_Y)
-    # print("DONE valY 1")
-    # val_data(train_blur, val_Y)
-    # print("DONE valY 2")
-
-    # return train_X, train_Y, val_X, val_Y
+def generate_validation_set(data_path_X, data_path_Y):
+    c = 0
+    for folder, j in zip(sorted(os.listdir(data_path_X)), range(10)):
+        for image in sorted(os.listdir(os.path.join(data_path_X, folder))):
+            image_path = os.path.join(data_path_X, folder, image)
+            resized_image = resize_image(image_path)
+            plt.imsave(f'datasets/val_resized/{c}.png', resized_image)
+            c = c+1
+    c = 0
+    for folder, j in zip(sorted(os.listdir(data_path_Y)), range(10)):
+        for image in sorted(os.listdir(os.path.join(data_path_Y, folder))):
+            image_path = os.path.join(data_path_Y, folder, image)
+            resized_image = resize_image(image_path)
+            plt.imsave(f'datasets/val_sr_resized/{c}.png', resized_image)
+            c = c+1
 
 def resize_image(img_path):
     image = cv2.imread(img_path)
@@ -98,9 +120,3 @@ def resize_image(img_path):
     resized_image = cv2.cvtColor(resized_image, cv2.COLOR_BGR2RGB)
     return resized_image
 
-# # Save the data splits as .npy files
-# np.save('train_X.npy', train_X)
-# np.save('train_Y.npy', train_Y)
-
-# np.save('val_X.npy', val_X)
-# np.save('val_Y.npy', val_Y)

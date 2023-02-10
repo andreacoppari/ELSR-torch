@@ -350,4 +350,10 @@ MigrationBackup/
 .ionide/
 
 # Extra
-datasets/
+datasets/h5
+datasets/val
+datasets/train
+datasets/sr_resized
+datasets/resized
+datasets/val_resized
+datasets/val_sr_resized

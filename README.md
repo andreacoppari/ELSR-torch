@@ -1,3 +1,5 @@
+**Table of contents**
+
 - [ELSR-torch](#elsr-torch)
   * [Prerequisites](#prerequisites)
   * [Dataset](#dataset)

@@ -2,22 +2,27 @@ import math
 from torch import nn
 
 
+class ResBlock(nn.Module):
+    def __init__(self, in_channels, out_channels):
+        super(ResBlock, self).__init__()
+        self.conv1 = nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1)
+        self.prelu = nn.PReLU()
+        self.conv2 = nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1)
+    
+    def forward(self, x):
+        out = self.conv1(x)
+        out = self.prelu(out)
+        out = self.conv2(out)
+        return x + out
+
+
 class ELSR(nn.Module):
     def __init__(self, upscale_factor):
         super(ELSR, self).__init__()
-        self.first_part = nn.Sequential(
-            nn.Conv2d(3, 6, kernel_size=3, padding=3//2),
-            nn.ReLU(),
-            nn.Conv2d(6, 6, kernel_size=3, padding=3//2),
-            nn.PReLU(),
-            nn.Conv2d(6, 6, kernel_size=3, padding=3//2),
-            nn.ReLU(),
-        )
-        self.last_part = nn.Sequential(
-            nn.Conv2d(6, 3 * (upscale_factor ** 2), kernel_size=3, padding=3 // 2),     # 6 -> 48
-            nn.PixelShuffle(upscale_factor)
-        )
-
+        self.layer1 = nn.Conv2d(3, 6, kernel_size=3, padding=1),
+        self.layer2_4 = ResBlock(6, 6)
+        self.layer5 = nn.Conv2d(6, 3 * (upscale_factor ** 2), kernel_size=3, padding=1),     # 6 -> 48
+        self.layer6 = nn.PixelShuffle(upscale_factor)
         self._initialize_weights()
 
     def _initialize_weights(self):
@@ -31,23 +36,8 @@ class ELSR(nn.Module):
                     nn.init.zeros_(m.bias.data)
 
     def forward(self, x):
-        x = self.first_part(x)
-        x = self.last_part(x)
+        x = self.layer1(x)
+        x = self.layer2_4(x)
+        x = self.layer5(x)
+        x = self.layer6(x)
         return x
-
-
-class AverageMeter(object):
-    def __init__(self):
-        self.reset()
-
-    def reset(self):
-        self.val = 0
-        self.avg = 0
-        self.sum = 0
-        self.count = 0
-
-    def update(self, val, n=1):
-        self.val = val
-        self.sum += val * n
-        self.count += n
-        self.avg = self.sum / self.count

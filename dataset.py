@@ -4,7 +4,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import h5py
 from torch.utils.data import Dataset
-from preprocessing import convert_rgb_to_y
 
 
 class TrainDataset(Dataset):
@@ -14,7 +13,7 @@ class TrainDataset(Dataset):
 
     def __getitem__(self, idx):
         with h5py.File(self.h5_file, 'r') as f:
-            return np.expand_dims(f['lr'][idx] / 255., 0), np.expand_dims(f['hr'][idx] / 255., 0)
+            return f['lr'][idx] / 255., f['hr'][idx] / 255.
 
     def __len__(self):
         with h5py.File(self.h5_file, 'r') as f:
@@ -27,96 +26,97 @@ class ValDataset(Dataset):
 
     def __getitem__(self, idx):
         with h5py.File(self.h5_file, 'r') as f:
-            return np.expand_dims(f['lr'][str(idx)][:, :] / 255., 0), np.expand_dims(f['hr'][str(idx)][:, :] / 255., 0)
+            return f['lr'][idx] / 255., f['hr'][idx] / 255.
 
     def __len__(self):
         with h5py.File(self.h5_file, 'r') as f:
             return len(f['lr'])
 
 
-def training_data(out_path):
-    h5_file = h5py.File(out_path, "w")
+def training_data(train_path_X, train_path_Y, out_path):
+    with h5py.File(out_path, "w") as f:
+        low_res_images = []
+        high_res_images = []
+        for filename in sorted(os.listdir(train_path_X)):
+            low_res_image = cv2.imread(os.path.join(train_path_X, filename))
+            low_res_image = cv2.cvtColor(low_res_image, cv2.COLOR_BGR2RGB)
+            high_res_image = cv2.imread(os.path.join(train_path_Y, filename))
+            high_res_image = cv2.cvtColor(high_res_image, cv2.COLOR_BGR2RGB)
 
-    lr_patches = []
-    hr_patches = []
+            low_res_image = np.array(low_res_image).astype(np.float32).transpose(2,0,1)
+            high_res_image = np.array(high_res_image).astype(np.float32).transpose(2,0,1)
 
-    for image_path in sorted(os.listdir("datasets/resized/aug")):
-        lr = cv2.cvtColor(cv2.imread(f"datasets/resized/aug/{image_path}"), cv2.COLOR_BGR2RGB)
-        hr = cv2.cvtColor(cv2.imread(f"datasets/sr_resized/aug/{image_path}"), cv2.COLOR_BGR2RGB)
-
-        lr = np.array(lr, dtype='float32')
-        hr = np.array(hr, dtype='float32')
-        lr = convert_rgb_to_y(lr)
-        hr = convert_rgb_to_y(hr)
-
-        lr_patches.append(lr)
-        hr_patches.append(hr)
-    
-    h5_file.create_dataset('lr', data=np.array(lr_patches))
-    h5_file.create_dataset('hr', data=np.array(hr_patches))
-
-    h5_file.close()
-
-def val_data(out_path):
-    h5_file = h5py.File(out_path, 'w')
-
-    lr_group = h5_file.create_group('lr')
-    hr_group = h5_file.create_group('hr')
-
-    for i, image_path in enumerate(sorted(os.listdir("datasets/val_resized/"))):
-        lr = cv2.cvtColor(cv2.imread(f"datasets/val_resized/{image_path}"), cv2.COLOR_BGR2RGB)
-        hr = cv2.cvtColor(cv2.imread(f"datasets/val_sr_resized/{image_path}"), cv2.COLOR_BGR2RGB)
-
-        lr = np.array(lr, dtype='float32')
-        hr = np.array(hr, dtype='float32')
-        lr = convert_rgb_to_y(lr)
-        hr = convert_rgb_to_y(hr)
-
-        lr_group.create_dataset(str(i), data=lr)
-        hr_group.create_dataset(str(i), data=hr)
-
-    h5_file.close()
+            low_res_images.append(low_res_image)
+            high_res_images.append(high_res_image)
+        
+        low_res_images = np.array(low_res_images)
+        high_res_images = np.array(high_res_images)
+        f.create_dataset("lr", data=low_res_images)
+        f.create_dataset("hr", data=high_res_images)
 
 
-def generate_training_data(data_path):
+def val_data(train_path_X, train_path_Y, out_path):
+    with h5py.File(out_path, "w") as f:
+        low_res_images = []
+        high_res_images = []
+        for i, filename in enumerate(sorted(os.listdir(train_path_X))):
+            low_res_image = cv2.imread(os.path.join(train_path_X, filename))
+            low_res_image = cv2.cvtColor(low_res_image, cv2.COLOR_BGR2RGB)
+            high_res_image = cv2.imread(os.path.join(train_path_Y, filename))
+            high_res_image = cv2.cvtColor(high_res_image, cv2.COLOR_BGR2RGB)
+
+            low_res_image = np.array(low_res_image).astype(np.float32).transpose(2,0,1)
+            high_res_image = np.array(high_res_image).astype(np.float32).transpose(2,0,1)
+
+            low_res_images.append(low_res_image)
+            high_res_images.append(high_res_image)
+        
+        low_res_images = np.array(low_res_images)
+        high_res_images = np.array(high_res_images)
+        f.create_dataset("lr", data=low_res_images)
+        f.create_dataset("hr", data=high_res_images)
+
+def generate_training_data(data_path, out_path, scale):
+
+    if(not os.path.exists(out_path)):
+        os.makedirs(out_path)
+
     c = 0
-    if len(os.listdir('datasets/resized/')) > 0: c += 1000
+    if len(os.listdir(out_path)) > 0: c += len(os.listdir(out_path))
     for folder, j in zip(sorted(os.listdir(data_path)), range(10)):
         for image in sorted(os.listdir(os.path.join(data_path, folder))):
             image_path = os.path.join(data_path, folder, image)
-            resized_image = resize_image(image_path)
-            plt.imsave(f'datasets/resized/{c}.png', resized_image)
+            resized_image = resize_image(image_path, scale)
+            plt.imsave(f'{out_path}{c}.png', resized_image)
             c = c+1
 
-def generate_label_data(data_path):
-    c = 0
-    if len(os.listdir('datasets/sr_resized/')) > 0: c += 1000
-    for folder, j in zip(sorted(os.listdir(data_path)), range(10)):
-        for image in sorted(os.listdir(os.path.join(data_path, folder))):
-            image_path = os.path.join(data_path, folder, image)
-            resized_image = resize_image(image_path)
-            plt.imsave(f'datasets/sr_resized/{c}.png', resized_image)
-            c = c+1
+def generate_validation_set(data_path_X, out_path_X, data_path_Y, out_path_Y, scale):
 
-def generate_validation_set(data_path_X, data_path_Y):
+    if(not os.path.exists(out_path_X)):
+        os.makedirs(out_path_X)
+
     c = 0
     for folder, j in zip(sorted(os.listdir(data_path_X)), range(10)):
         for image in sorted(os.listdir(os.path.join(data_path_X, folder))):
             image_path = os.path.join(data_path_X, folder, image)
-            resized_image = resize_image(image_path)
-            plt.imsave(f'datasets/val_resized/{c}.png', resized_image)
+            resized_image = resize_image(image_path, scale)
+            plt.imsave(f'{out_path_X}{c}.png', resized_image)
             c = c+1
+
+    if(not os.path.exists(out_path_Y)):
+        os.makedirs(out_path_Y)
+
     c = 0
     for folder, j in zip(sorted(os.listdir(data_path_Y)), range(10)):
         for image in sorted(os.listdir(os.path.join(data_path_Y, folder))):
             image_path = os.path.join(data_path_Y, folder, image)
-            resized_image = resize_image(image_path)
-            plt.imsave(f'datasets/val_sr_resized/{c}.png', resized_image)
+            resized_image = resize_image(image_path, scale)
+            plt.imsave(f'{out_path_Y}{c}.png', resized_image)
             c = c+1
 
-def resize_image(img_path):
+def resize_image(img_path, scale):
     image = cv2.imread(img_path)
-    resized_image = cv2.resize(image, dsize=(image.shape[1]//4, image.shape[0]//4))
+    resized_image = cv2.resize(image, dsize=(image.shape[1]//scale, image.shape[0]//scale), interpolation=cv2.INTER_CUBIC)
     resized_image = cv2.cvtColor(resized_image, cv2.COLOR_BGR2RGB)
     return resized_image
 

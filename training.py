@@ -70,14 +70,14 @@ if __name__ == '__main__':
     optimizer = Adam(model.parameters(), lr=args.lr)
 
     # Learning Rate Scheduler
-    lambda1 = lambda epoch: args.lr*0*5**(epoch//(args.epochs//5*2))
+    lambda1 = lambda epoch: args.lr
     scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer=optimizer, lr_lambda=lambda1)
 
     train_dataset = TrainDataset(args.train)
     train_dataloader = DataLoader(dataset=train_dataset,
                                   batch_size=args.batch_size,
                                   shuffle=True,
-                                  pin_memory=False)
+                                  pin_memory=True)
     
     val_dataset = ValDataset(args.val)
     val_dataloader = DataLoader(dataset=val_dataset,
@@ -85,19 +85,21 @@ if __name__ == '__main__':
                                 shuffle=False)
 
     best_psnr = 0.0
-    
+    train_losses = []
+    psnrs = []
+
     for epoch in range(1, args.epochs+1):
         train_loss = train(model=model, dataloader=train_dataloader, loss_fn=criterion, optimizer=optimizer, device=device, scheduler=scheduler)
         val_psnr = validate(model=model, dataloader=val_dataloader, device=device)
+
+        train_losses.append(train_loss)
+        psnrs.append(val_psnr)
 
         if val_psnr > best_psnr:
             best_psnr = val_psnr
             torch.save(model.state_dict(), os.path.join(args.out,f'best_X{args.scale}_model.pth'))
 
         print(f"Epoch [{epoch}/{args.epochs}], Train Loss: {train_loss}, Validation PSNR: {val_psnr}")
-
-        if epoch % 50 == 0:
-            torch.save(model.state_dict(), os.path.join(args.out, f'epoch_{epoch}_X{args.scale}.pth'))
     
-    # torch.save(model.state_dict(), os.path.join(args.out, f'epoch_{epoch}_X{args.scale}.pth'))
-
+    torch.save(model.state_dict(), os.path.join(args.out, f'epoch_{epoch}_X{args.scale}.pth'))
+    np.save(f'plot_data/train_losses_X{args.scale}_{args.loss}.npy', np.array(train_losses, dtype=np.float32))

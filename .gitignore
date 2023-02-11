@@ -357,3 +357,7 @@ datasets/sr_resized
 datasets/resized
 datasets/val_resized
 datasets/val_sr_resized
+datasets/sr_resized_X2
+datasets/sr_resized_X4
+datasets/val_resized_X2
+datasets/val_sr_resized_X4

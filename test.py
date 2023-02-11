@@ -9,6 +9,7 @@ from model import ELSR
 from preprocessing import psnr, prepare_img
 
 def test_image(model, device, img, upscale_factor):
+    img = cv2.resize(img, (img.shape[1]//upscale_factor*upscale_factor, img.shape[0]//upscale_factor*upscale_factor), interpolation=cv2.INTER_CUBIC)
     lr_img = cv2.resize(img, (img.shape[1]//upscale_factor, img.shape[0]//upscale_factor), interpolation=cv2.INTER_CUBIC)
     bicubic_upscaled = cv2.resize(lr_img, (img.shape[1], img.shape[0]), interpolation=cv2.INTER_CUBIC)
 
@@ -17,7 +18,7 @@ def test_image(model, device, img, upscale_factor):
     img = prepare_img(img, device)
 
     with torch.no_grad():
-        sr_img = model(lr_img)
+        sr_img = model(lr_img).clamp(0, 1)
 
     return sr_img, bicubic_upscaled, img
 
@@ -48,7 +49,7 @@ if __name__ == '__main__':
 
     #Save images
     
-    out = sr_img.cpu().numpy().squeeze(0).transpose(1,2,0)
+    out = sr_img.cpu().numpy().squeeze(0).transpose(1, 2, 0)
     bicubic_out = bicubic_upscaled.cpu().numpy().squeeze(0).transpose(1, 2, 0)
 
     plt.imsave("out/output.png", out)

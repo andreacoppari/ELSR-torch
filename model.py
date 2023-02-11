@@ -19,10 +19,11 @@ class ResBlock(nn.Module):
 class ELSR(nn.Module):
     def __init__(self, upscale_factor):
         super(ELSR, self).__init__()
-        self.layer1 = nn.Conv2d(3, 6, kernel_size=3, padding=1),
+        self.layer1 = nn.Conv2d(3, 6, kernel_size=3, padding=1)
         self.layer2_4 = ResBlock(6, 6)
-        self.layer5 = nn.Conv2d(6, 3 * (upscale_factor ** 2), kernel_size=3, padding=1),     # 6 -> 48
+        self.layer5 = nn.Conv2d(6, 3 * (upscale_factor ** 2), kernel_size=3, padding=1)     # 6 -> 48
         self.layer6 = nn.PixelShuffle(upscale_factor)
+        self.relu = nn.ReLU()
         self._initialize_weights()
 
     def _initialize_weights(self):
@@ -37,7 +38,11 @@ class ELSR(nn.Module):
 
     def forward(self, x):
         x = self.layer1(x)
+        x = self.relu(x)
         x = self.layer2_4(x)
+        x = self.relu(x)
         x = self.layer5(x)
+        x = self.relu(x)
         x = self.layer6(x)
+        x = self.relu(x)
         return x

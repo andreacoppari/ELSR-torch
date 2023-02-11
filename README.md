@@ -24,6 +24,7 @@ Once installed the required packages, download the [dataset](https://drive.googl
 ## Dataset
 ELSR is trained on the REDS dataset, composed of sets of 300 videos each with a different degradation. This model is trained on a drastically reduced version of the dataset, containing only 30 videos with lower resolution (the original dataset was too big for me to train). The dataset (h5 files) is available at the following link: [https://drive.google.com/drive/folders/158bbeXr6EtCiuLI5wSh3SYRWMaWxK0Mq?usp=sharing](https://drive.google.com/drive/folders/158bbeXr6EtCiuLI5wSh3SYRWMaWxK0Mq?usp=sharing).
 To prevent overfitting and achieve better training results, I've done some random data augmentation (see augnmenet_data() in preprocessing.py). An example of augmentation by rotation is shown below:
+
 ![](/plots/aug.png)
 
 ## Usage
@@ -94,8 +95,13 @@ The testing of single frame super-resolution is done in this way (video-sr is ac
  3. Use the low resolution image to predict the sr_image
  4. Calculate PSNR between sr_image and bicubic_upsampled
 The results are shown below:
+
 ![](/plots/sanremo_upscaled.png)
+
 The PSNR of the generated image has shown to be lower, but the resulting images are smoother, making bigger images better-looking:
+
 ![](/plots/sonic_upscaled.png)
+
 Blurring stands out in pixelated images:
+
 ![](/plots/pika_upscaled.png)

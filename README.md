@@ -45,9 +45,9 @@ python training.py \
 	--val "datasets/h5/val_X2.h5" \
 	--out "checkpoints/" \
 	--scale 2 \
-	--epochs 50 \
+	--epochs 250 \
 	--loss "mae" \
-	--lr 0.05
+	--lr 0.02
 ```
 
 ### Training step 2
@@ -57,7 +57,7 @@ python training.py \
 	--val "datasets/h5/val_X4.h5" \
 	--out "checkpoints/" \
 	--scale 4 \
-	--epochs 100 \
+	--epochs 250 \
 	--loss "mae" \
 	--lr 0.05 \
 	--weights "best_X2_model.pth"
@@ -70,7 +70,7 @@ python training.py \
 	--val "datasets/h5/val_X4.h5" \
 	--out "checkpoints/" \
 	--scale 4 \
-	--epochs 100 \
+	--epochs 250 \
 	--loss "mse" \
 	--lr 0.02 --weights "best_X4_model.pth"
 ```

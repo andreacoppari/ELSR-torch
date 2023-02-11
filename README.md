@@ -1,8 +1,10 @@
 **Table of contents**
 
 - [ELSR-torch](#elsr-torch)
-  * [Prerequisites](#prerequisites)
+  * [Requirements](#requirements)
   * [Dataset](#dataset)
+  * [Model](#model)
+	+ [PixelShuffle](#pixelshuffle)
   * [Usage](#usage)
   * [Training](#training)
     + [Training step 1](#training-step-1)
@@ -14,10 +16,10 @@
 # ELSR-torch
 Implementation of the paper ["ELSR: Extreme Low-Power Super Resolution Network For Mobile Devices"](https://arxiv.org/abs/2208.14600) using PyTorch. The code replicates the method proposed by the paper, but it is meant to be trained on limited devices. For that purpose the dataset is drastically smaller, and the training is way simpler.
 
-## Prerequisites
+## Requirements
 In order to run the code on your machine you will need the packages listed on the file requirements.txt. I suggest using Anaconda, run:
 ```bash
-conda create -n elsr --file requirements.txt python -c conda-forge -c pytorch -c nvidia
+conda create -n elsr --file requirements.txt 
 ```
 Once installed the required packages, download the [dataset](https://drive.google.com/drive/folders/158bbeXr6EtCiuLI5wSh3SYRWMaWxK0Mq?usp=sharing) I used to run the training. Alternatively you can download the entire REDS dataset from [here](https://seungjunnah.github.io/Datasets/reds.html).
 
@@ -26,6 +28,14 @@ ELSR is trained on the REDS dataset, composed of sets of 300 videos each with a 
 To prevent overfitting and achieve better training results, I've done some random data augmentation (see augment_data() in preprocessing.py). An example of augmentation by rotation is shown below:
 
 ![](/plots/aug.png)
+
+## Model
+The ELSR model is a small sub-pixel convolutional neural network with 6 layers, only 5 of them are learnable. The architecture is shown in the image below:
+
+![](/plots/elsr.png)
+
+### PixelShuffle
+The PixelShuffle block (also known as depth2space) that performs computationally efficient upsampling by rearranging pixels in an image to increase its spatial resolution. Formally, let **x** be a tensor of size (**batch_size**, **C_in**, **H_in**, **W_in**), where **C_in** is the number of input channels, **H_in** and **W_in** are the height and width of the input, respectively. The goal of PixelShuffle is to upsample the spatial resolution of **x** by a factor of **r**, meaning that the output should be a tensor of size (**batch_size**, **C_out**, **H_in** * **r**, **W_in** * **r**), where **C_out** = **C_in** // **r^2**.
 
 ## Usage
 To train the model run:

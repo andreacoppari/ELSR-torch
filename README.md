@@ -88,7 +88,9 @@ python training.py \
 
 ## Results
 Due to the limited size of the dataset I wasn't able to replicate the papers results, but indeed there are interesting results proving that video-super-resolution can be done in such a small model. The graphs below are the training losses through each training step:
+
 ![](/plots/training_losses.png)
+
 The testing of single frame super-resolution is done in this way (video-sr is achieved by iterating sr on every frame):
  1. Resize the input image to (image.height // upscale_factor, image.width // upscale_factor) using Bicubic interpolation
  2. Calculate the bicubic_upsampled image of the previously produced low resolution image by the same upscaling factor using Bicubic interpolation

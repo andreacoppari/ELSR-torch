@@ -134,7 +134,9 @@ Blurring stands out in pixelated images:
 ### Low-power real-time video super-resolution
 Of course tests on videos have been done. To achieve "real-time" video-sr the model should be able to produce at least 30 FPS on edge devices, I couldn't test the model on mobile, but on GPU the video is produced at 2500+ FPS (see [project_report.ipynb](./project_report.ipynb)). GIFs below:
 
-![](./out/bicubic_video.gif)  | ![](./out/sr_video.gif)
+| Bicubic GIF: 28.20 dB  | ELSR GIF: 28.45 dB    |
+| ------------- | ------------- |
+| ![](./out/bicubic_video.gif)  | ![](./out/sr_video.gif)  |
 
 ## Project report
 You can find a complete project report in [this notebook](./project_report.ipynb).

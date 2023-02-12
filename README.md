@@ -11,6 +11,7 @@
     + [Training step 2](#training-step-2)
     + [Training step 3](#training-step-3)
   * [Results](#results)
+	+ [Tests](#tests)
 
 
 # ELSR-torch
@@ -100,6 +101,8 @@ python training.py \
 Due to the limited size of the dataset I wasn't able to replicate the papers results, but indeed there are interesting results proving that video-super-resolution can be done in such a small model. The graphs below are the training losses through each training step:
 
 ![](/plots/training_losses.png)
+
+### Tests
 
 The testing of single frame super-resolution is done in this way (video-sr is achieved by iterating sr on every frame):
  1. Resize the input image to (image.height // upscale_factor, image.width // upscale_factor) using Bicubic interpolation

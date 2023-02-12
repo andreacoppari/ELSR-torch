@@ -20,8 +20,13 @@
 # ELSR-torch
 Implementation of the paper ["ELSR: Extreme Low-Power Super Resolution Network For Mobile Devices"](https://arxiv.org/abs/2208.14600) using PyTorch. The code replicates the method proposed by the paper, but it is meant to be trained on limited devices. For that purpose the dataset is drastically smaller, and the training is way simpler.
 
-## Requirements
-In order to run the code on your machine you will need the packages listed on the file requirements.txt. I suggest using Anaconda, run:
+### Requirements
+ - pytorch=1.13.1
+ - opencv=4.7.0
+ - pillow=9.4.0
+ - matplotlib
+
+If you use Anaconda on Windows you can just:
 ```bash
 conda create -n elsr --file requirements.txt 
 ```

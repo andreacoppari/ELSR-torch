@@ -70,7 +70,7 @@ if __name__ == '__main__':
     optimizer = Adam(model.parameters(), lr=args.lr)
 
     # Learning Rate Scheduler
-    lambda1 = lambda epoch: args.lr*(0.5**(epoch//(args.epochs/5*2)))
+    lambda1 = lambda epoch: args.lr*0.5 if epoch > args.epochs // 5 * 2 else args.lr
     scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer=optimizer, lr_lambda=lambda1)
 
     train_dataset = TrainDataset(args.train)

@@ -42,3 +42,4 @@ def prepare_img(img, device):
     x = torch.from_numpy(x).to(device)
     x = x.permute(2, 0, 1).unsqueeze(0)  # permute the dimensions to match the input size of the model
     return x
+

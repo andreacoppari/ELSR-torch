@@ -3,6 +3,7 @@
 - [ELSR-torch](#elsr-torch)
   * [Requirements](#requirements)
   * [Dataset](#dataset)
+	+ [Data augmentation](#data-augmentation)
   * [Model](#model)
 	+ [PixelShuffle](#pixelshuffle)
   * [Usage](#usage)
@@ -12,6 +13,8 @@
     + [Training step 3](#training-step-3)
   * [Results](#results)
 	+ [Tests](#tests)
+	+ [Low-power real-time video super-resolution](#low-power-real-time-video-super-resolution)
+  * [Project report](#project-report)
 
 
 # ELSR-torch
@@ -25,13 +28,15 @@ conda create -n elsr --file requirements.txt
 Once installed the required packages, download the [dataset](https://drive.google.com/drive/folders/158bbeXr6EtCiuLI5wSh3SYRWMaWxK0Mq?usp=sharing) I used to run the training. Alternatively you can download the entire REDS dataset from [here](https://seungjunnah.github.io/Datasets/reds.html).
 
 ## Dataset
-ELSR is trained on the REDS dataset, composed of sets of 300 videos each with a different degradation. This model is trained on a drastically reduced version of the dataset, containing only 30 videos with lower resolution (the original dataset was too big for me to train). The dataset (h5 files) is available at the following link: [https://drive.google.com/drive/folders/158bbeXr6EtCiuLI5wSh3SYRWMaWxK0Mq?usp=sharing](https://drive.google.com/drive/folders/158bbeXr6EtCiuLI5wSh3SYRWMaWxK0Mq?usp=sharing).
-To prevent overfitting and achieve better training results, I've done some random data augmentation (see augment_data() in preprocessing.py). An example of augmentation by rotation is shown below:
+ELSR is trained on the REDS dataset, composed of sets of 300 videos, each set has a different degradation. My model is trained on a drastically reduced version of the dataset, containing only 30 videos with lower resolution (the original dataset was too big for me to train). The dataset (h5 files) is available at the following link: [https://drive.google.com/drive/folders/158bbeXr6EtCiuLI5wSh3SYRWMaWxK0Mq?usp=sharing](https://drive.google.com/drive/folders/158bbeXr6EtCiuLI5wSh3SYRWMaWxK0Mq?usp=sharing).
+
+### Data augmentation
+To prevent overfitting and achieve better training results, I've done some random data augmentation (see augment_data() in [preprocessing.py](./preprocessing.py)). An example of augmentation by rotation is shown below:
 
 ![](/plots/aug.png)
 
 ## Model
-The ELSR model is a small sub-pixel convolutional neural network with 6 layers, only 5 of them are learnable. The architecture is shown in the image below:
+The ELSR model is a small sub-pixel convolutional neural network with 6 layers. Only 5 of them have learnable parameters. The architecture is shown in the image below:
 
 ![](/plots/elsr.png)
 
@@ -67,7 +72,7 @@ python training.py \
 	--scale 2 \
 	--epochs 300 \
 	--loss "mae" \
-	--lr 0.02
+	--lr 0.01
 ```
 
 ### Training step 2
@@ -78,7 +83,7 @@ python training.py \
 	--val "datasets/h5/val_X4.h5" \
 	--out "checkpoints/" \
 	--scale 4 \
-	--epochs 250 \
+	--epochs 50 \
 	--loss "mae" \
 	--lr 0.05 \
 	--weights "best_X2_model.pth"
@@ -120,3 +125,13 @@ The PSNR of the generated image has shown to be lower, but the resulting images 
 Blurring stands out in pixelated images:
 
 ![](/plots/pika_upscaled.png)
+
+### Low-power real-time video super-resolution
+Of course tests on videos have been done. To achieve "real-time" video-sr the model should be able to produce at least 30 FPS on edge devices, I couldn't test the model on mobile, but on GPU the video is produced at 2500+ FPS (see [project_report.ipynb](./project_report.ipynb)). GIFs below:
+
+| Bicubic GIF: 28.20 dB  | ELSR GIF: 28.45 dB    |
+| ------------- | ------------- |
+| ![](./out/bicubic_video.gif)  | ![](./out/sr_video.gif)  |
+
+## Project report
+You can find a complete project report in [this notebook](./project_report.ipynb).

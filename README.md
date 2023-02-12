@@ -41,16 +41,16 @@ The PixelShuffle block (also known as depth2space) that performs computationally
 ## Usage
 To train the model run:
 ```bash
-python training.py                      \
-	--train <training_dataset_path>     \
-	--val <validation_dataset_path>     \
-	--out <path_for_best_model>         \
+python training.py	\
+	--train <training_dataset_path>	\
+	--val <validation_dataset_path>	\
+	--out <path_for_best_model>	\
 	--weights <weights_path(not required)>
 ```
 To test the model run:
 ```bash
-python training.py                          \
-	--weights <weights_path(not required)>  \
+python training.py	\
+	--weights <weights_path(not required)>	\
 	--input <input_frames_path>
 ```
 

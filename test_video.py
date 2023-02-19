@@ -83,12 +83,12 @@ if __name__ == '__main__':
         out = sr_img.cpu().numpy().squeeze(0).transpose(1, 2, 0)
         plt.imsave(f"out/sr_video/sr_{i}.png", out)
         gif.append(Image.fromarray((out*255).astype(np.uint8)))
-    gif[0].save('out/sr_video.gif', save_all=True, append_images=gif[1:], duration=10)
+    gif[0].save('out/sr_video.gif', save_all=True, append_images=gif[1:], duration=10, loop=0)
 
     gif = []
     for i, sr_img in enumerate(sr_video):
         out = sr_img.cpu().numpy().squeeze(0).transpose(1, 2, 0)
         plt.imsave(f"out/bicubic_video/bicubic_{i}.png", out)
         gif.append(Image.fromarray((out*255).astype(np.uint8)))
-    gif[0].save('out/bicubic_video.gif', save_all=True, append_images=gif[1:], duration=10)
+    gif[0].save('out/bicubic_video.gif', save_all=True, append_images=gif[1:], duration=10, loop=0)
 
